@@ -47,6 +47,7 @@ import com.jesuscast.gamefotballapp.features.chat.presentation.components.ChatIn
 import com.jesuscast.gamefotballapp.features.chat.presentation.components.ChatMessageItem
 import com.jesuscast.gamefotballapp.features.chat.presentation.components.PlayerProgressSection
 import com.jesuscast.gamefotballapp.features.chat.presentation.components.RetaDetailHeader
+import com.jesuscast.gamefotballapp.features.lobby.presentation.components.AppAlertDialog
 import com.jesuscast.gamefotballapp.features.lobby.presentation.components.BackgroundDark
 import com.jesuscast.gamefotballapp.features.lobby.presentation.components.NeonGreen
 
@@ -64,6 +65,17 @@ fun RetaDetailScreen(
         if (state.messages.isNotEmpty()) {
             listState.animateScrollToItem(state.messages.size - 1)
         }
+    }
+
+    // ── Alert dialog ─────────────────────────────────────────────────────────
+    state.alertEvent?.let { alert ->
+        AppAlertDialog(
+            type = alert.type,
+            title = alert.title,
+            message = alert.message,
+            onConfirm = viewModel::onDismissAlert,
+            onDismiss = viewModel::onDismissAlert
+        )
     }
 
     Scaffold(
