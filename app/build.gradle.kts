@@ -45,7 +45,7 @@ android {
         create("dev") {
             dimension = "environment"
             buildConfigField("String", "BASE_URL_GAMEFOTBALL", "\"https://rickandmortyapi.com/api/\"")
-            resValue("string", "app_name", "Demo (DEV)")
+            resValue("string", "app_name", "ChuyM)")
         }
 
         create("prod") {
@@ -95,6 +95,7 @@ dependencies {
     ksp(libs.room.compiler)                                         // Room KSP processor
     implementation(libs.okhttp)                                     // OkHttp
     implementation(libs.okhttp.logging)                             // OkHttp Logging
+    implementation(libs.datastore.preferences)                      // DataStore Preferences
 
 
 

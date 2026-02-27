@@ -7,6 +7,8 @@ data class Reta(
     val maxJugadores: Int,
     val jugadoresActuales: Int,
     val listaJugadores: List<Jugador>,
-    val zonaId: String
+    val zonaId: String,
+    val creadorId: String = "",
+    val creadorNombre: String = ""
 )
 

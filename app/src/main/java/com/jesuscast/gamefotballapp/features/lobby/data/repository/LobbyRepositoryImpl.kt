@@ -33,6 +33,15 @@ class LobbyRepositoryImpl(
         scope.launch {
             wsClient.messages.collect { message ->
                 when (message) {
+                    is WsIncomingMessage.RetasZona -> {
+                        // Initial load: replace all retas for this zone in Room
+                        retaDao.deleteByZona(currentZonaId)
+                        message.retas.forEach { dto ->
+                            retaDao.upsert(dto.toEntity(currentZonaId))
+                            jugadorDao.deleteByReta(dto.id)
+                            jugadorDao.upsertAll(dto.listaJugadores.map { it.toEntity(dto.id) })
+                        }
+                    }
                     is WsIncomingMessage.NuevaReta -> {
                         val dto = message.reta
                         retaDao.upsert(dto.toEntity(currentZonaId))
@@ -73,7 +82,7 @@ class LobbyRepositoryImpl(
     override fun conectar(zonaId: String) {
         currentZonaId = zonaId
         wsClient.disconnect()
-        wsClient.connect()
+        wsClient.connect(zonaId)
     }
 
     override fun desconectar() {
@@ -92,7 +101,11 @@ class LobbyRepositoryImpl(
             usuarioId = usuarioId,
             nombre = nombre
         )
-        wsClient.send(gson.toJson(request))
+        val json = gson.toJson(request)
+        val sent = wsClient.send(json)
+        if (!sent) {
+            throw Exception("No se pudo enviar el mensaje. El WebSocket no está conectado.")
+        }
     }
 
     override suspend fun rollbackUnirse(
@@ -117,7 +130,7 @@ class LobbyRepositoryImpl(
         titulo: String,
         fechaHora: String,
         maxJugadores: Int,
-        creadorId: String,
+        creadorId: String?,
         creadorNombre: String
     ) {
         val request = WsCrearRetaRequest(
@@ -128,7 +141,11 @@ class LobbyRepositoryImpl(
             creadorId = creadorId,
             creadorNombre = creadorNombre
         )
-        wsClient.send(gson.toJson(request))
+        val json = gson.toJson(request)
+        val sent = wsClient.send(json)
+        if (!sent) {
+            throw Exception("No se pudo enviar el mensaje. El WebSocket no está conectado.")
+        }
     }
 }
 

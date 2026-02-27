@@ -10,7 +10,7 @@ class CrearRetaUseCase(
         titulo: String,
         fechaHora: String,
         maxJugadores: Int,
-        creadorId: String,
+        creadorId: String? = null,
         creadorNombre: String
     ) = repository.crearReta(
         zonaId = zonaId,

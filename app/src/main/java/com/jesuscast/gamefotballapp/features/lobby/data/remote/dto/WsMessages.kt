@@ -5,6 +5,11 @@ import com.google.gson.annotations.SerializedName
 /** Incoming WebSocket message from server → client */
 sealed class WsIncomingMessage {
 
+    /** Initial load: all retas of the zone sent right after connecting */
+    data class RetasZona(
+        val retas: List<RetaDto>
+    ) : WsIncomingMessage()
+
     data class NuevaReta(
         val reta: RetaDto
     ) : WsIncomingMessage()
@@ -25,10 +30,15 @@ sealed class WsIncomingMessage {
 /** Raw Gson-deserialized DTO before discriminating on `status` */
 data class WsRawMessageDto(
     @SerializedName("status") val status: String? = null,
+    // retas_zona
+    @SerializedName("retas") val retas: List<RetaDto>? = null,
+    // nueva_reta
     @SerializedName("reta") val reta: RetaDto? = null,
+    // actualizacion
     @SerializedName("reta_id") val retaId: String? = null,
     @SerializedName("jugadores_actuales") val jugadoresActuales: Int? = null,
     @SerializedName("lista_jugadores") val listaJugadores: List<JugadorDto>? = null,
+    // error
     @SerializedName("mensaje") val mensaje: String? = null
 )
 
@@ -39,7 +49,8 @@ data class WsCrearRetaRequest(
     @SerializedName("titulo") val titulo: String,
     @SerializedName("fecha_hora") val fechaHora: String,
     @SerializedName("max_jugadores") val maxJugadores: Int,
-    @SerializedName("creador_id") val creadorId: String,
+    /** Optional — server generates a UUID if omitted */
+    @SerializedName("creador_id") val creadorId: String? = null,
     @SerializedName("creador_nombre") val creadorNombre: String
 )
 

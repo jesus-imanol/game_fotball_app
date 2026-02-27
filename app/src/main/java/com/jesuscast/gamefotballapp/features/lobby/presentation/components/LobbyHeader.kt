@@ -1,5 +1,10 @@
 package com.jesuscast.gamefotballapp.features.lobby.presentation.components
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -32,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jesuscast.gamefotballapp.features.lobby.presentation.WsConnectionState
 
 /**
  * Header: location selector + notification bell + "VolFootball" title + greeting.
@@ -42,7 +49,8 @@ fun LobbyHeader(
     zonaSeleccionada: String,
     zonas: List<String>,
     onZonaSeleccionada: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    wsConnectionState: WsConnectionState = WsConnectionState.CONNECTING
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -149,6 +157,52 @@ fun LobbyHeader(
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 36.sp
+        )
+
+        // ── WS Connection status pill ──────────────────────────────────────
+        WsStatusPill(state = wsConnectionState)
+    }
+}
+
+@Composable
+private fun WsStatusPill(state: WsConnectionState) {
+    val dotColor = when (state) {
+        WsConnectionState.CONNECTED    -> NeonGreen
+        WsConnectionState.CONNECTING   -> Color(0xFFFFAA00)
+        WsConnectionState.DISCONNECTED -> Color(0xFF9E9E9E)
+        WsConnectionState.ERROR        -> Color(0xFFFF4444)
+    }
+    val label = when (state) {
+        WsConnectionState.CONNECTED    -> "En vivo"
+        WsConnectionState.CONNECTING   -> "Conectando..."
+        WsConnectionState.DISCONNECTED -> "Sin conexión"
+        WsConnectionState.ERROR        -> "Error de conexión"
+    }
+
+    // Pulse animation for CONNECTING state
+    val infiniteTransition = rememberInfiniteTransition(label = "ws_pulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (state == WsConnectionState.CONNECTING) 0.3f else 1f,
+        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+        label = "dot_alpha"
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(dotColor.copy(alpha = alpha))
+        )
+        Text(
+            text = label,
+            color = dotColor,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium
         )
     }
 }

@@ -8,6 +8,8 @@ data class RetaDto(
     @SerializedName("fecha_hora") val fechaHora: String,
     @SerializedName("max_jugadores") val maxJugadores: Int,
     @SerializedName("jugadores_actuales") val jugadoresActuales: Int,
-    @SerializedName("lista_jugadores") val listaJugadores: List<JugadorDto>
+    @SerializedName("lista_jugadores") val listaJugadores: List<JugadorDto>,
+    @SerializedName("creador_id") val creadorId: String? = null,
+    @SerializedName("creador_nombre") val creadorNombre: String? = null
 )
 
