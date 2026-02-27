@@ -32,7 +32,7 @@ fun ChatMessageItem(
         verticalAlignment = Alignment.Top
     ) {
         // Avatar
-        val initials = message.nombreUsuario.split(" ")
+        val initials = message.nombre.split(" ")
             .take(2)
             .joinToString("") { it.take(1).uppercase() }
             .take(2)
@@ -61,13 +61,13 @@ fun ChatMessageItem(
         // Name + message
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = message.nombreUsuario,
+                text = message.nombre,
                 color = TextSlate400,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = message.mensaje,
+                text = message.texto,
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal

@@ -81,7 +81,7 @@ class RetaDetailViewModel @Inject constructor(
 
     private fun conectarChat() {
         _uiState.update { it.copy(wsConnectionState = WsConnectionState.CONNECTING) }
-        chatRepository.conectar(retaId)
+        chatRepository.conectar(retaId, zonaId)
     }
 
     // ─── Observe reta from lobby Room DB ─────────────────────────────────────
@@ -195,10 +195,8 @@ class RetaDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 enviarMensajeUseCase(
-                    retaId = retaId,
                     usuarioId = state.currentUserId,
-                    nombre = state.currentUserNombre,
-                    mensaje = msg
+                    texto = msg
                 )
             } catch (e: Exception) {
                 // Restore message on failure and show alert

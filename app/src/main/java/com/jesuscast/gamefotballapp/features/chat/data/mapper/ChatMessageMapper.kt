@@ -8,8 +8,8 @@ fun ChatMessageDto.toEntity(): ChatMessageEntity = ChatMessageEntity(
     id = id,
     retaId = retaId,
     usuarioId = usuarioId,
-    nombreUsuario = nombreUsuario,
-    mensaje = mensaje,
+    nombre = nombre,
+    texto = texto,
     timestamp = timestamp
 )
 
@@ -17,8 +17,8 @@ fun ChatMessageEntity.toDomain(): ChatMessage = ChatMessage(
     id = id,
     retaId = retaId,
     usuarioId = usuarioId,
-    nombreUsuario = nombreUsuario,
-    mensaje = mensaje,
+    nombre = nombre,
+    texto = texto,
     timestamp = timestamp
 )
 

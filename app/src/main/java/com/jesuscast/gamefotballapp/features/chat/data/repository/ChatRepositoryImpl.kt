@@ -33,10 +33,10 @@ class ChatRepositoryImpl(
                     is WsChatIncomingMessage.HistorialChat -> {
                         // Initial load: replace all messages for this reta in Room
                         chatMessageDao.deleteByReta(currentRetaId)
-                        chatMessageDao.upsertAll(message.messages.map { it.toEntity() })
+                        chatMessageDao.upsertAll(message.mensajes.map { it.toEntity() })
                     }
                     is WsChatIncomingMessage.NuevoMensaje -> {
-                        chatMessageDao.upsert(message.message.toEntity())
+                        chatMessageDao.upsert(message.mensajeChat.toEntity())
                     }
                     // Errors handled at ViewModel level via wsClient.messages collector
                     else -> Unit
@@ -52,27 +52,20 @@ class ChatRepositoryImpl(
             entities.map { it.toDomain() }
         }
 
-    override fun conectar(retaId: String) {
+    override fun conectar(retaId: String, zonaId: String) {
         currentRetaId = retaId
         wsClient.disconnect()
-        wsClient.connect(retaId)
+        wsClient.connect(retaId, zonaId)
     }
 
     override fun desconectar() {
         wsClient.disconnect()
     }
 
-    override suspend fun enviarMensaje(
-        retaId: String,
-        usuarioId: String,
-        nombre: String,
-        mensaje: String
-    ) {
+    override suspend fun enviarMensaje(usuarioId: String, texto: String) {
         val request = WsEnviarMensajeRequest(
-            retaId = retaId,
             usuarioId = usuarioId,
-            nombre = nombre,
-            mensaje = mensaje
+            texto = texto
         )
         val json = gson.toJson(request)
         val sent = wsClient.send(json)

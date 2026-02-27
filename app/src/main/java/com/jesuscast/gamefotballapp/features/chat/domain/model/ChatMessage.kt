@@ -4,8 +4,8 @@ data class ChatMessage(
     val id: String,
     val retaId: String,
     val usuarioId: String,
-    val nombreUsuario: String,
-    val mensaje: String,
-    val timestamp: Long
+    val nombre: String,
+    val texto: String,
+    val timestamp: String
 )
 

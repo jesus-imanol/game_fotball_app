@@ -7,7 +7,7 @@ import com.jesuscast.gamefotballapp.features.chat.data.local.entity.ChatMessageE
 
 @Database(
     entities = [ChatMessageEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class ChatDatabase : RoomDatabase() {

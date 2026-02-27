@@ -22,7 +22,7 @@ object ChatDatabaseModule {
             context,
             ChatDatabase::class.java,
             "chat_db"
-        ).build()
+        ).fallbackToDestructiveMigration(dropAllTables = true).build()
 
     @Provides
     @Singleton

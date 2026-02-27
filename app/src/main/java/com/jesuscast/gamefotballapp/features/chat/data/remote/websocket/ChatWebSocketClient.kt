@@ -15,7 +15,7 @@ import okhttp3.WebSocketListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val WS_URL = "wss://apigamesfotball.chuy7x.space/ws/chat"
+private const val WS_URL = "wss://apigamesfotball.chuy7x.space/ws/retas/chat"
 
 @Singleton
 class ChatWebSocketClient @Inject constructor(
@@ -38,21 +38,25 @@ class ChatWebSocketClient @Inject constructor(
     val connectionStatus: SharedFlow<ConnectionStatus> = _connectionStatus.asSharedFlow()
 
     private var pendingRetaId: String = ""
+    private var pendingZonaId: String = ""
 
     /**
-     * Connects the WebSocket and on open immediately sends the
-     * reta_id so the server responds with historial_chat.
+     * Connects the WebSocket and on open immediately sends
+     * reta_id + zona_id so the server responds with historial_chat.
      */
-    fun connect(retaId: String = pendingRetaId) {
+    fun connect(retaId: String, zonaId: String) {
         pendingRetaId = retaId
+        pendingZonaId = zonaId
         if (webSocket != null) return
         val request = Request.Builder().url(WS_URL).build()
         webSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 _connectionStatus.tryEmit(ConnectionStatus.Connected)
-                if (pendingRetaId.isNotBlank()) {
-                    val subscribe = gson.toJson(mapOf("reta_id" to pendingRetaId))
+                if (pendingRetaId.isNotBlank() && pendingZonaId.isNotBlank()) {
+                    val subscribe = gson.toJson(
+                        mapOf("reta_id" to pendingRetaId, "zona_id" to pendingZonaId)
+                    )
                     webSocket.send(subscribe)
                 }
             }
@@ -63,11 +67,11 @@ class ChatWebSocketClient @Inject constructor(
 
                 val parsed: WsChatIncomingMessage = when (raw.status) {
                     "historial_chat" -> WsChatIncomingMessage.HistorialChat(
-                        raw.messages ?: emptyList()
+                        raw.mensajes ?: emptyList()
                     )
 
-                    "nuevo_mensaje" -> if (raw.message != null)
-                        WsChatIncomingMessage.NuevoMensaje(raw.message)
+                    "nuevo_mensaje" -> if (raw.mensajeChat != null)
+                        WsChatIncomingMessage.NuevoMensaje(raw.mensajeChat)
                     else WsChatIncomingMessage.Unknown
 
                     "error" -> WsChatIncomingMessage.Error(

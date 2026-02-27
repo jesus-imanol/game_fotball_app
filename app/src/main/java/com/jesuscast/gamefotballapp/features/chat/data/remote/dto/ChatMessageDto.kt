@@ -6,8 +6,8 @@ data class ChatMessageDto(
     @SerializedName("id") val id: String,
     @SerializedName("reta_id") val retaId: String,
     @SerializedName("usuario_id") val usuarioId: String,
-    @SerializedName("nombre_usuario") val nombreUsuario: String,
-    @SerializedName("mensaje") val mensaje: String,
-    @SerializedName("timestamp") val timestamp: Long
+    @SerializedName("nombre") val nombre: String,
+    @SerializedName("texto") val texto: String,
+    @SerializedName("timestamp") val timestamp: String
 )
 
