@@ -10,7 +10,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -63,6 +65,7 @@ fun RetaHeroCard(
     isPendingJoin: Boolean,
     currentUserId: String,
     onUnirse: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isAlreadyJoined = reta.listaJugadores.any { it.usuarioId == currentUserId }
@@ -75,6 +78,7 @@ fun RetaHeroCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
+            .clickable { onClick() }
             .background(SurfaceDark)
             .border(1.dp, BorderWhite, RoundedCornerShape(32.dp))
             .shadow(elevation = 24.dp, shape = RoundedCornerShape(32.dp), clip = false)

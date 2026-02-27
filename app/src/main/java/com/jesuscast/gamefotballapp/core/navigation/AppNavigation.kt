@@ -3,17 +3,23 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.jesuscast.gamefotballapp.core.session.SessionManager
 import com.jesuscast.gamefotballapp.features.auth.presentation.LoginScreen
+import com.jesuscast.gamefotballapp.features.chat.presentation.RetaDetailScreen
 import com.jesuscast.gamefotballapp.features.lobby.presentation.LobbyScreen
 
-/** Sealed class defining the two main routes. */
+/** Sealed class defining the main routes. */
 sealed class Route(val route: String) {
     object Login : Route("login")
     object Lobby : Route("lobby")
+    object RetaDetail : Route("reta_detail/{retaId}/{zonaId}") {
+        fun createRoute(retaId: String, zonaId: String) = "reta_detail/$retaId/$zonaId"
+    }
 }
 
 @Composable
@@ -38,7 +44,23 @@ fun AppNavigation(sessionManager: SessionManager) {
         }
 
         composable(Route.Lobby.route) {
-            LobbyScreen()
+            LobbyScreen(
+                onRetaClick = { retaId, zonaId ->
+                    navController.navigate(Route.RetaDetail.createRoute(retaId, zonaId))
+                }
+            )
+        }
+
+        composable(
+            route = Route.RetaDetail.route,
+            arguments = listOf(
+                navArgument("retaId") { type = NavType.StringType },
+                navArgument("zonaId") { type = NavType.StringType }
+            )
+        ) {
+            RetaDetailScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

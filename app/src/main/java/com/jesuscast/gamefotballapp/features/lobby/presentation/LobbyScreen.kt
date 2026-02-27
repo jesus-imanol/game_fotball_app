@@ -45,6 +45,7 @@ import com.jesuscast.gamefotballapp.features.lobby.presentation.components.TextS
 
 @Composable
 fun LobbyScreen(
+    onRetaClick: (retaId: String, zonaId: String) -> Unit = { _, _ -> },
     viewModel: LobbyViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -161,7 +162,8 @@ fun LobbyScreen(
                                 reta = state.retas.first(),
                                 isPendingJoin = state.pendingJoinRetaId == state.retas.first().id,
                                 currentUserId = state.currentUserId,
-                                onUnirse = { viewModel.onUnirse(state.retas.first()) }
+                                onUnirse = { viewModel.onUnirse(state.retas.first()) },
+                                onClick = { onRetaClick(state.retas.first().id, state.zonaSeleccionada) }
                             )
                         }
 
@@ -189,7 +191,8 @@ fun LobbyScreen(
                                     reta = reta,
                                     isPendingJoin = state.pendingJoinRetaId == reta.id,
                                     currentUserId = state.currentUserId,
-                                    onUnirse = { viewModel.onUnirse(reta) }
+                                    onUnirse = { viewModel.onUnirse(reta) },
+                                    onClick = { onRetaClick(reta.id, state.zonaSeleccionada) }
                                 )
                             }
                         }
