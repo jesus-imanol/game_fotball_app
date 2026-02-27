@@ -77,12 +77,12 @@ fun ChatInputBar(
 
         IconButton(
             onClick = onSend,
-            enabled = enabled && message.isNotBlank(),
+            enabled = true,
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(
-                    if (message.isNotBlank()) NeonGreen else NeonGreen.copy(alpha = 0.3f)
+                    if (enabled && message.isNotBlank()) NeonGreen else NeonGreen.copy(alpha = 0.3f)
                 ),
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = Color.Black,

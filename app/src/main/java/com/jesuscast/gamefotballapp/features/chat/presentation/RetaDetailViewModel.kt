@@ -11,7 +11,9 @@ import com.jesuscast.gamefotballapp.features.chat.domain.usecase.EnviarMensajeUs
 import com.jesuscast.gamefotballapp.features.chat.domain.usecase.ObservarMensajesUseCase
 import com.jesuscast.gamefotballapp.features.lobby.domain.usecase.ObservarRetasUseCase
 import com.jesuscast.gamefotballapp.features.lobby.domain.usecase.UnirseARetaUseCase
+import com.jesuscast.gamefotballapp.features.lobby.presentation.AlertEvent
 import com.jesuscast.gamefotballapp.features.lobby.presentation.WsConnectionState
+import com.jesuscast.gamefotballapp.features.lobby.presentation.components.AlertType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -132,9 +134,61 @@ class RetaDetailViewModel @Inject constructor(
     fun onSendMessage() {
         val state = _uiState.value
         val msg = state.currentMessage.trim()
-        if (msg.isBlank()) return
-        if (state.currentUserId.isBlank()) return
-        if (state.wsConnectionState != WsConnectionState.CONNECTED) return
+
+        if (msg.isBlank()) {
+            _uiState.update {
+                it.copy(
+                    alertEvent = AlertEvent(
+                        type = AlertType.WARNING,
+                        title = "Mensaje vacío",
+                        message = "Escribe un mensaje antes de enviar."
+                    )
+                )
+            }
+            return
+        }
+
+        if (state.currentUserId.isBlank()) {
+            _uiState.update {
+                it.copy(
+                    alertEvent = AlertEvent(
+                        type = AlertType.ERROR,
+                        title = "Sesión no disponible",
+                        message = "No se pudo obtener tu información de usuario. Intenta cerrar sesión e iniciar de nuevo."
+                    )
+                )
+            }
+            return
+        }
+
+        // Check if user is joined to the reta
+        val reta = state.reta
+        val isJoined = reta?.listaJugadores?.any { it.usuarioId == state.currentUserId } == true
+        if (!isJoined) {
+            _uiState.update {
+                it.copy(
+                    alertEvent = AlertEvent(
+                        type = AlertType.INFO,
+                        title = "Únete primero",
+                        message = "Necesitas unirte a la reta antes de poder enviar mensajes."
+                    )
+                )
+            }
+            return
+        }
+
+        if (state.wsConnectionState != WsConnectionState.CONNECTED) {
+            _uiState.update {
+                it.copy(
+                    alertEvent = AlertEvent(
+                        type = AlertType.NO_CONNECTION,
+                        title = "Sin conexión",
+                        message = "No hay conexión con el servidor de chat. Espera un momento o vuelve a intentar."
+                    )
+                )
+            }
+            return
+        }
 
         _uiState.update { it.copy(currentMessage = "") }
 
@@ -146,11 +200,24 @@ class RetaDetailViewModel @Inject constructor(
                     nombre = state.currentUserNombre,
                     mensaje = msg
                 )
-            } catch (_: Exception) {
-                // Restore message on failure
-                _uiState.update { it.copy(currentMessage = msg) }
+            } catch (e: Exception) {
+                // Restore message on failure and show alert
+                _uiState.update {
+                    it.copy(
+                        currentMessage = msg,
+                        alertEvent = AlertEvent(
+                            type = AlertType.ERROR,
+                            title = "Error al enviar",
+                            message = e.message ?: "No se pudo enviar el mensaje. Intenta de nuevo."
+                        )
+                    )
+                }
             }
         }
+    }
+
+    fun onDismissAlert() {
+        _uiState.update { it.copy(alertEvent = null) }
     }
 
     // ─── Join reta ───────────────────────────────────────────────────────────
