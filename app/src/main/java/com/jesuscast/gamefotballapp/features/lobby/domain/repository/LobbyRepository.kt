@@ -37,7 +37,7 @@ interface LobbyRepository {
         titulo: String,
         fechaHora: String,
         maxJugadores: Int,
-        creadorId: String,
+        creadorId: String? = null,
         creadorNombre: String
     )
 }

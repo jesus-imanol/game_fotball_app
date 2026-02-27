@@ -15,7 +15,7 @@ import okhttp3.WebSocketListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val WS_URL = "ws://apigamesfotball.chuy7x.space/ws/retas"
+private const val WS_URL = "wss://apigamesfotball.chuy7x.space/ws/retas"
 
 @Singleton
 class LobbyWebSocketClient @Inject constructor(
@@ -37,13 +37,26 @@ class LobbyWebSocketClient @Inject constructor(
     )
     val connectionStatus: SharedFlow<ConnectionStatus> = _connectionStatus.asSharedFlow()
 
-    fun connect() {
+    /** zonaId to subscribe on open — set before calling connect() */
+    private var pendingZonaId: String = ""
+
+    /**
+     * Connects the WebSocket and on open immediately sends a
+     * lightweight ping with zona_id so the server responds with retas_zona.
+     */
+    fun connect(zonaId: String = pendingZonaId) {
+        pendingZonaId = zonaId
         if (webSocket != null) return
         val request = Request.Builder().url(WS_URL).build()
         webSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 _connectionStatus.tryEmit(ConnectionStatus.Connected)
+                // Send zona_id so server broadcasts retas_zona immediately
+                if (pendingZonaId.isNotBlank()) {
+                    val subscribe = gson.toJson(mapOf("zona_id" to pendingZonaId))
+                    webSocket.send(subscribe)
+                }
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -51,6 +64,8 @@ class LobbyWebSocketClient @Inject constructor(
                     .getOrNull() ?: return
 
                 val parsed: WsIncomingMessage = when (raw.status) {
+                    "retas_zona" -> WsIncomingMessage.RetasZona(raw.retas ?: emptyList())
+
                     "nueva_reta" -> if (raw.reta != null)
                         WsIncomingMessage.NuevaReta(raw.reta)
                     else WsIncomingMessage.Unknown

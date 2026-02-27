@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.jesuscast.gamefotballapp.features.lobby.data.local.dao.JugadorDao
 import com.jesuscast.gamefotballapp.features.lobby.data.local.dao.RetaDao
 import com.jesuscast.gamefotballapp.features.lobby.data.local.database.LobbyDatabase
+import com.jesuscast.gamefotballapp.features.lobby.data.local.database.MIGRATION_1_2
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +24,9 @@ object LobbyDatabaseModule {
             context,
             LobbyDatabase::class.java,
             "lobby_db"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     @Singleton

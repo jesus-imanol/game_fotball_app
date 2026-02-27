@@ -61,9 +61,11 @@ private const val STADIUM_IMG =
 fun RetaHeroCard(
     reta: Reta,
     isPendingJoin: Boolean,
+    currentUserId: String,
     onUnirse: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isAlreadyJoined = reta.listaJugadores.any { it.usuarioId == currentUserId }
     val isFull = reta.jugadoresActuales >= reta.maxJugadores
     val progress = if (reta.maxJugadores > 0)
         reta.jugadoresActuales.toFloat() / reta.maxJugadores.toFloat() else 0f
@@ -230,14 +232,14 @@ fun RetaHeroCard(
                 // Join button
                 Button(
                     onClick = onUnirse,
-                    enabled = !isFull && !isPendingJoin,
+                    enabled = !isAlreadyJoined && !isFull && !isPendingJoin,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = NeonGreen,
-                        disabledContainerColor = NeonGreen.copy(alpha = 0.3f)
+                        containerColor = if (isAlreadyJoined) Color(0xFF1A3A1A) else NeonGreen,
+                        disabledContainerColor = if (isAlreadyJoined) Color(0xFF1A3A1A) else NeonGreen.copy(alpha = 0.3f)
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
@@ -267,12 +269,16 @@ fun RetaHeroCard(
                             Icon(
                                 imageVector = Icons.Default.SportsSoccer,
                                 contentDescription = null,
-                                tint = Color.Black,
+                                tint = if (isAlreadyJoined) NeonGreen else Color.Black,
                                 modifier = Modifier.size(22.dp)
                             )
                             Text(
-                                text = if (isFull) "Reta llena" else "Unirme a la reta",
-                                color = Color.Black,
+                                text = when {
+                                    isAlreadyJoined -> "Inscrito ✓"
+                                    isFull -> "Reta llena"
+                                    else -> "Unirme a la reta"
+                                },
+                                color = if (isAlreadyJoined) NeonGreen else Color.Black,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 17.sp
                             )

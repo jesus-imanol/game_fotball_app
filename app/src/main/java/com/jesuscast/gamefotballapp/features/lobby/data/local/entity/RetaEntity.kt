@@ -10,5 +10,7 @@ data class RetaEntity(
     val fechaHora: String,
     val maxJugadores: Int,
     val jugadoresActuales: Int,
-    val zonaId: String
+    val zonaId: String,
+    val creadorId: String = "",
+    val creadorNombre: String = ""
 )

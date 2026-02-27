@@ -16,7 +16,7 @@ object NetworkModule {
     @GamesFotballRetrofit
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://jsonplaceholder.typicode.com/")
+            .baseUrl("https://apigamesfotball.chuy7x.space/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

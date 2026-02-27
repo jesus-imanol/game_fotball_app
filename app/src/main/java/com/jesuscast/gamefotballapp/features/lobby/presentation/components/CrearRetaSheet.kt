@@ -55,14 +55,16 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun CrearRetaSheet(
     onDismiss: () -> Unit,
-    onCrear: (titulo: String, fechaHora: String, maxJugadores: Int) -> Unit
+    onCrear: (titulo: String, fechaHora: String, maxJugadores: Int, creadorNombre: String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var titulo by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("20:00") }
+    var creadorNombre by remember { mutableStateOf("") }
     var capacidad by remember { mutableFloatStateOf(14f) }
     var tituloError by remember { mutableStateOf(false) }
+    var nombreError by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -139,6 +141,50 @@ fun CrearRetaSheet(
                 }
             }
 
+            // ── Tu nombre (creador) ───────────────────────────────────────
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "TU NOMBRE",
+                    color = TextSlate400,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                )
+                TextField(
+                    value = creadorNombre,
+                    onValueChange = {
+                        creadorNombre = it
+                        nombreError = false
+                    },
+                    placeholder = { Text("Ej. Carlos", color = TextSlate600) },
+                    isError = nombreError,
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(
+                            1.dp,
+                            if (nombreError) Color.Red.copy(alpha = 0.6f)
+                            else Color.White.copy(alpha = 0.1f),
+                            RoundedCornerShape(12.dp)
+                        ),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = SurfaceDark,
+                        unfocusedContainerColor = SurfaceDark,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        cursorColor = NeonGreen,
+                        focusedLabelColor = NeonGreen,
+                    )
+                )
+                if (nombreError) {
+                    Text("Tu nombre es obligatorio", color = Color.Red, fontSize = 12.sp)
+                }
+            }
+
             // ── Hora de inicio ────────────────────────────────────────────
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -201,8 +247,8 @@ fun CrearRetaSheet(
                 Slider(
                     value = capacidad,
                     onValueChange = { capacidad = it },
-                    valueRange = 10f..22f,
-                    steps = 5,   // 10,12,14,16,18,20,22  → 5 steps between 7 values
+                    valueRange = 4f..22f,
+                    steps = 8,   // 4,6,8,10,12,14,16,18,20,22  → 8 steps between 10 values
                     modifier = Modifier.fillMaxWidth(),
                     colors = SliderDefaults.colors(
                         thumbColor = NeonGreen,
@@ -216,7 +262,7 @@ fun CrearRetaSheet(
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    listOf("10", "16", "22").forEach { mark ->
+                    listOf("4", "8", "12", "16", "22").forEach { mark ->
                         Text(text = mark, color = TextSlate600, fontSize = 10.sp)
                     }
                 }
@@ -228,12 +274,13 @@ fun CrearRetaSheet(
             Button(
                 onClick = {
                     tituloError = titulo.isBlank()
-                    if (!tituloError) {
+                    nombreError = creadorNombre.isBlank()
+                    if (!tituloError && !nombreError) {
                         val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         val time = runCatching {
                             LocalTime.parse(hora).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
                         }.getOrDefault("${hora.take(5)}:00")
-                        onCrear(titulo.trim(), "$today $time", capacidad.toInt())
+                        onCrear(titulo.trim(), "$today $time", capacidad.toInt(), creadorNombre.trim())
                     }
                 },
                 modifier = Modifier

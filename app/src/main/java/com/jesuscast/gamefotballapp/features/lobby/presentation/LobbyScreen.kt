@@ -21,13 +21,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jesuscast.gamefotballapp.features.lobby.presentation.components.AppAlertDialog
 import com.jesuscast.gamefotballapp.features.lobby.presentation.components.BackgroundDark
 import com.jesuscast.gamefotballapp.features.lobby.presentation.components.CrearRetaSheet
 import com.jesuscast.gamefotballapp.features.lobby.presentation.components.LobbyBottomNav
@@ -51,22 +48,15 @@ fun LobbyScreen(
     viewModel: LobbyViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(Unit) {
-        viewModel.errors.collect { message ->
-            snackbarHostState.showSnackbar(message)
-        }
-    }
 
     Scaffold(
         containerColor = BackgroundDark,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             LobbyHeader(
                 zonaSeleccionada = state.zonaSeleccionada,
                 zonas = state.zonas,
-                onZonaSeleccionada = viewModel::onZonaSeleccionada
+                onZonaSeleccionada = viewModel::onZonaSeleccionada,
+                wsConnectionState = state.wsConnectionState
             )
         },
         bottomBar = {
@@ -151,7 +141,7 @@ fun LobbyScreen(
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Text(
-                                    text = "Hola, Campeón 👋",
+                                    text = "Hola, ${state.currentUserNombre.ifBlank { "Campeón" }} 👋",
                                     color = Color.White,
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.SemiBold
@@ -170,6 +160,7 @@ fun LobbyScreen(
                             RetaHeroCard(
                                 reta = state.retas.first(),
                                 isPendingJoin = state.pendingJoinRetaId == state.retas.first().id,
+                                currentUserId = state.currentUserId,
                                 onUnirse = { viewModel.onUnirse(state.retas.first()) }
                             )
                         }
@@ -197,6 +188,7 @@ fun LobbyScreen(
                                 RetaHeroCard(
                                     reta = reta,
                                     isPendingJoin = state.pendingJoinRetaId == reta.id,
+                                    currentUserId = state.currentUserId,
                                     onUnirse = { viewModel.onUnirse(reta) }
                                 )
                             }
@@ -213,9 +205,20 @@ fun LobbyScreen(
     if (state.isCrearBottomSheetVisible) {
         CrearRetaSheet(
             onDismiss = viewModel::onCerrarCrearBottomSheet,
-            onCrear = { titulo, fechaHora, maxJugadores ->
-                viewModel.onCrearReta(titulo, fechaHora, maxJugadores)
+            onCrear = { titulo, fechaHora, maxJugadores, creadorNombre ->
+                viewModel.onCrearReta(titulo, fechaHora, maxJugadores, creadorNombre)
             }
+        )
+    }
+
+    // ── Alert Dialog ─────────────────────────────────────────────────────────
+    state.alertEvent?.let { alert ->
+        AppAlertDialog(
+            type    = alert.type,
+            title   = alert.title,
+            message = alert.message,
+            onConfirm = viewModel::onDismissAlert,
+            onDismiss = viewModel::onDismissAlert
         )
     }
 }
